@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <vector>
 #include <string>
+#include "Types.h"
 
 // Опережающее объявление структуры пользовательской функции
 struct UserFunction;
@@ -85,15 +86,6 @@ public:
      * @return Значение бита под номером index.
      */
     bool evaluate(Context ctx) const override;
-};
-
-/**
- * @brief Поддерживаемые базисные логические операции.
- */
-enum class OperatorType {
-    AND, ///< Логическое И (конъюнкция)
-    OR,  ///< Логическое ИЛИ (дизъюнкция)
-    NOT  ///< Логическое НЕ (отрицание)
 };
 
 /**
