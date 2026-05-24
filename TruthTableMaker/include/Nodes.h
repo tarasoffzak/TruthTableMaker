@@ -5,7 +5,8 @@
 #include <vector>
 #include <string>
 
-class FunctManager;
+// Опережающее объявление структуры пользовательской функции
+struct UserFunction;
 
 /**
  * @brief Контекст вычисления выражения.
@@ -133,18 +134,16 @@ public:
  */
 class FunctNode : public Node {
 private:
-    std::string funcName;        ///< Имя вызываемой функции.
+    const UserFunction* func;    ///< Прямой указатель на описание и тело функции.
     std::vector<Node*> children; ///< Аргументы функции (поддеревья основного выражения).
-    FunctManager& functManager;  ///< Ссылка на менеджер для получения AST функции.
 
 public:
     /**
      * @brief Конструктор узла пользовательской функции.
-     * @param name Имя функции.
+     * @param functPtr Указатель на структуру функции, полученный от парсера.
      * @param args Вектор указателей на узлы-аргументы. Класс берет ответственность за их удаление.
-     * @param fm Ссылка на менеджер пользовательских функций.
      */
-    FunctNode(std::string name, std::vector<Node*> args, FunctManager& fm);
+    FunctNode(const UserFunction* functPtr, std::vector<Node*> args);
 
     /**
      * @brief Деструктор. Освобождает память всех узлов-аргументов.
@@ -153,12 +152,6 @@ public:
     
     /**
      * @brief Вычисляет функцию как поддерево.
-     * 
-     * Оценивает аргументы в текущем основном контексте `ctx`, формирует новый локальный 
-     * контекст и вычисляет корень поддерева функции через `FunctManager`.
-     * 
-     * @param ctx Основной контекст вычисления.
-     * @return Результат выполнения пользовательской функции.
      */
     bool evaluate(Context ctx) const override;
 };
