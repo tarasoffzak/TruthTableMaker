@@ -1,27 +1,31 @@
+/**
+ * @file Nodes.h
+ * @brief Объявление классов узлов абстрактного синтаксического дерева (AST).
+ */
+
 #ifndef AST_NODES_H
 #define AST_NODES_H
 
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <memory>
 #include "Types.h"
 
-// Опережающее объявление структуры пользовательской функции
 struct UserFunction;
 
 /**
  * @brief Контекст вычисления выражения.
- * 
+ *
  * Представляет собой 64-битное целое число (битовую маску), 
- * где каждый бит (от 0 до 63) соответствует логическому (булеву) значению 
+ * где каждый бит (от 0 до 63) соответствует логическому значению 
  * переменной с соответствующим индексом.
  */
 using Context = uint64_t;
 
 /**
+ * @class Node
  * @brief Абстрактный базовый класс узла дерева разбора (AST).
- * 
- * От этого класса наследуются все типы узлов логического выражения.
  */
 class Node {
 public:
@@ -32,18 +36,15 @@ public:
     
     /**
      * @brief Вычисляет логическое значение узла.
-     * 
      * @param ctx Контекст (битовая маска значений переменных).
-     * @return true если результат вычисления истина, иначе false.
+     * @return true, если результат вычисления истина, иначе false.
      */
     virtual bool evaluate(Context ctx) const = 0;
 };
 
 /**
+ * @class ConstNode
  * @brief Узел логической константы.
- * 
- * Хранит фиксированное логическое значение (true или false), 
- * которое не зависит от контекста вычисления.
  */
 class ConstNode : public Node {
 private:
@@ -65,20 +66,19 @@ public:
 };
 
 /**
+ * @class VarNode
  * @brief Узел логической переменной.
- * 
- * Значение переменной извлекается из переданного контекста по ее индексу.
  */
 class VarNode : public Node {
 private:
-    int index; ///< Индекс переменной (номер бита в контексте).
+    size_t index; ///< Индекс переменной (номер бита в контексте от 0 до 63).
 
 public:
     /**
      * @brief Конструктор узла переменной.
      * @param idx Индекс (порядковый номер) переменной.
      */
-    explicit VarNode(int idx);
+    explicit VarNode(size_t idx);
 
     /**
      * @brief Извлекает значение переменной из контекста.
@@ -89,28 +89,22 @@ public:
 };
 
 /**
+ * @class OperNode
  * @brief Узел базисной логической операции.
- * 
- * Применяет базовый оператор к своим дочерним узлам (операндам).
  */
 class OperNode : public Node {
 private:
-    OperatorType op;             ///< Тип выполняемой операции.
-    std::vector<Node*> children; ///< Дочерние узлы (операнды).
+    OperatorType op;                               ///< Тип выполняемой операции.
+    std::vector<std::shared_ptr<Node>> children;   ///< Дочерние узлы (операнды).
 
 public:
     /**
      * @brief Конструктор узла операции.
      * @param operation Тип логической операции (AND, OR, NOT).
-     * @param args Вектор указателей на дочерние узлы-операнды. Класс берет ответственность за их удаление.
+     * @param args Вектор умных указателей на дочерние узлы-операнды.
      */
-    OperNode(OperatorType operation, std::vector<Node*> args);
+    OperNode(OperatorType operation, std::vector<std::shared_ptr<Node>> args);
 
-    /**
-     * @brief Деструктор. Освобождает память всех дочерних узлов.
-     */
-    ~OperNode() override;
-    
     /**
      * @brief Вычисляет значения дочерних узлов и применяет к ним оператор.
      * @param ctx Текущий контекст вычисления.
@@ -120,30 +114,26 @@ public:
 };
 
 /**
+ * @class FunctNode
  * @brief Узел вызова пользовательской функции.
- * 
- * Интерпретирует функцию через вычисление ее поддерева в изолированном контексте.
  */
 class FunctNode : public Node {
 private:
-    const UserFunction* func;    ///< Прямой указатель на описание и тело функции.
-    std::vector<Node*> children; ///< Аргументы функции (поддеревья основного выражения).
+    const UserFunction* func;                      ///< Константный указатель на описание функции.
+    std::vector<std::shared_ptr<Node>> children;   ///< Аргументы функции (поддеревья).
 
 public:
     /**
      * @brief Конструктор узла пользовательской функции.
-     * @param functPtr Указатель на структуру функции, полученный от парсера.
-     * @param args Вектор указателей на узлы-аргументы. Класс берет ответственность за их удаление.
+     * @param functPtr Указатель на структуру функции из FunctManager.
+     * @param args Вектор умных указателей на узлы-аргументы.
      */
-    FunctNode(const UserFunction* functPtr, std::vector<Node*> args);
-
-    /**
-     * @brief Деструктор. Освобождает память всех узлов-аргументов.
-     */
-    ~FunctNode() override;
+    FunctNode(const UserFunction* functPtr, std::vector<std::shared_ptr<Node>> args);
     
     /**
-     * @brief Вычисляет функцию как поддерево.
+     * @brief Вычисляет значение пользовательской функции в изолированном контексте.
+     * @param ctx Текущий контекст вычисления.
+     * @return Результат выполнения функции.
      */
     bool evaluate(Context ctx) const override;
 };

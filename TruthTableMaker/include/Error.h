@@ -1,3 +1,8 @@
+/**
+ * @file Error.h
+ * @brief Объявление типов ошибок, класса исключения Error и статического менеджера ErrorManager.
+ */
+
 #ifndef ERROR_H
 #define ERROR_H
 
@@ -6,6 +11,7 @@
 #include <vector>
 
 /**
+ * @enum ErrorType
  * @brief Типы возможных ошибок в программе.
  */
 enum class ErrorType {
@@ -16,14 +22,15 @@ enum class ErrorType {
 };
 
 /**
+ * @class Error
  * @brief Класс, представляющий ошибку в программе.
- * 
+ *
  * Наследуется от std::runtime_error для интеграции со стандартным механизмом 
  * исключений C++. Хранит тип ошибки и подробное описание.
  */
 class Error : public std::runtime_error {
 private:
-    ErrorType type; ///< Категория ошибки
+    ErrorType type; ///< Категория ошибки.
 
 public:
     /**
@@ -35,25 +42,29 @@ public:
 
     /**
      * @brief Возвращает тип ошибки.
+     * @return Объект перечисления ErrorType.
      */
     ErrorType getType() const;
 
     /**
      * @brief Возвращает строковое название типа ошибки.
-     * @return Строка (например, "Syntax Error").
+     * @return Строка с текстовым представлением типа (например, "Syntax Error").
      */
     std::string getTypeString() const;
 };
 
 /**
+ * @class ErrorManager
  * @brief Менеджер для централизованной обработки и накопления ошибок.
- * 
+ *
  * Предоставляет статические методы для регистрации ошибок, их накопления
  * в памяти и принудительного прерывания работы (через исключения).
  */
 class ErrorManager {
 private:
-    /** @brief Внутреннее хранилище накопленных ошибок. */
+    /**
+     * @brief Внутреннее хранилище накопленных ошибок. 
+     */
     static std::vector<Error> errorHistory;
 
 public:
@@ -62,7 +73,7 @@ public:
 
     /**
      * @brief Регистрирует ошибку и выбрасывает исключение.
-     * 
+     *
      * Добавляет ошибку в историю и немедленно прерывает выполнение.
      * @param type Тип ошибки.
      * @param details Подробное описание.
@@ -79,12 +90,13 @@ public:
 
     /**
      * @brief Проверяет, были ли зафиксированы ошибки.
-     * @return true, если есть хотя бы одна ошибка.
+     * @return true, если есть хотя бы одна ошибка, иначе false.
      */
     static bool hasErrors();
 
     /**
      * @brief Возвращает список всех накопленных ошибок.
+     * @return Константная ссылка на вектор с историю ошибок.
      */
     static const std::vector<Error>& getHistory();
 
