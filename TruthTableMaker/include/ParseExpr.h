@@ -1,27 +1,27 @@
 /**
- * @file Parser.h
- * @brief Объявление функций синтаксического анализа логических выражений в ОПН.
+ * @file ParseExpr.h
+ * @brief Объявление функций синтаксического анализа логических выражений.
  */
 
-#ifndef PARSER_H
-#define PARSER_H
+#ifndef PARSEEXPR_H
+#define PARSEEXPR_H
 
 #include <string>
 #include <memory>
 
 // Опережающие объявления для развязки зависимостей
 class ExprTree;
+struct Config;
 
 /**
- * @brief Выполняет синтаксический анализ и построение дерева логического выражения.
- * Функция преобразует строку в формате обратной польской записи (ОПН) в 
- * иерархическую структуру дерева (ExprTree), готовую к вычислению.
+ * @brief Строит дерево логического выражения из строки в формате ОПН.
  *
- * @param expression Строка, содержащая выражение в ОПН с пробелами в качестве разделителей.
- * @return std::shared_ptr<ExprTree> Указатель на построенное дерево выражения.
- * @throws Error Если выражение содержит синтаксические ошибки,
- * неизвестные операторы, или если стек вычислений некорректен после обработки.
+ * @param expression Строка в формате ОПН с пробелами-разделителями.
+ * @param config Объект конфигурации с набором операторов и настроек парсинга.
+ * @return std::shared_ptr<ExprTree> Указатель на корень построенного дерева.
+ * @throws Error Если выражение некорректно, содержит неизвестные элементы 
+ * или стек вычислений остался в невалидном состоянии.
  */
-std::shared_ptr<ExprTree> parseExprRPN(const std::string& expression);
+std::shared_ptr<ExprTree> parseExprRPN(const std::string& expression, const Config& config);
 
-#endif // PARSER_H
+#endif // PARSEEXPR_H
