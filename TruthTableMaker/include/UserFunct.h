@@ -67,6 +67,16 @@ public:
     void loadFromFile(const std::string& filePath, Parser& parser);
 
     /**
+     * @brief Разбирает определение пользовательской функции из строки.
+     *
+     * Ожидается, что тело функции также описано в формате ОПН.
+     * @param definition Строка с определением функции (например, "MYFUNC = x y &").
+     * @return Готовая структура UserFunction, которую можно передать в FunctManager.
+     * @throws Error При неверном формате определения функции.
+     */
+    UserFunction parseUserFunction(const std::string& definition);
+
+    /**
      * @brief Регистрирует новую функцию в системе вручную.
      * @param func Структура с данными скомпилированной функции.
      * @throws Error Если функция с таким именем уже зарегистрирована.
