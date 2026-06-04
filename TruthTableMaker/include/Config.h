@@ -12,6 +12,15 @@
 #include "Types.h"
 
 /**
+ * @struct OperatorInfo
+ * @brief Хранит данные об операторе: его тип и арность.
+ */
+struct OperatorInfo {
+    OperatorType type;
+    size_t arity;
+};
+
+/**
  * @struct Config
  * @brief Структура для хранения параметров конфигурации программы.
  *
@@ -24,11 +33,11 @@ struct Config {
      */
     ///@{
     
-    /// Карта соответствия типа операции и ее символьного представления во входной строке.
-    std::map<OperatorType, std::string> operatorSymbols = {
-        {OperatorType::AND, "&"},
-        {OperatorType::OR,  "|"},
-        {OperatorType::NOT, "!"}
+    /// Карта: "символ оператора" : {Тип, Арность}
+    std::map<std::string, OperatorInfo> operators = {
+        {"&", {OperatorType::AND, 2}},
+        {"|", {OperatorType::OR,  2}},
+        {"!", {OperatorType::NOT, 1}}
     };
 
     /// Префикс, используемый для идентификации вызовов пользовательских функций.
