@@ -17,7 +17,7 @@
  */
 struct OperatorInfo {
     OperatorType type;
-    size_t arity;
+    Arity arity;
 };
 
 /**
@@ -60,7 +60,7 @@ struct Config {
      * @return Количество операндов, которое необходимо извлечь из стека.
      * @throws std::runtime_error Если токен не является оператором.
      */
-    size_t getOperatorArity(const std::string& token) const;
+    Arity getOperatorArity(const std::string& token) const;
     
     ///@}
 

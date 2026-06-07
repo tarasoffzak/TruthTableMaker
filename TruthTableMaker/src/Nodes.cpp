@@ -24,7 +24,7 @@ bool ConstNode::evaluate(Context /*ctx*/) const {
 // Реализация VarNode
 // ============================================================================
 
-VarNode::VarNode(size_t idx) : index(idx) {}
+VarNode::VarNode(VarID idx) : index(idx) {}
 
 bool VarNode::evaluate(Context ctx) const {
     // 1. Сдвинуть единицу влево на величину индекса переменной.
@@ -90,7 +90,7 @@ bool FunctNode::evaluate(Context ctx) const {
     Context newCtx = 0;
     
     // 2. Установить счетчик аргументов в ноль.
-    size_t argCounter = 0;
+    Arity argCounter = 0;
     
     // 3. Для каждого аргумента выполнить операции:
     for (const auto& arg : children) {
