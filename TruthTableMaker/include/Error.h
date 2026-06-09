@@ -110,6 +110,11 @@ public:
      * @param details Текст предупреждения.
      */
     static void warning(const std::string& details);
+
+    /**
+     * @brief Выводит все накопленные ошибки из истории в поток ошибок.
+     */
+    static void printHistory();
 };
 
 #endif // ERROR_H

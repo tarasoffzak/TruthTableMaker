@@ -54,3 +54,9 @@ void ErrorManager::warning(const std::string& details) {
     // Предупреждения не ломают программу, просто выводим их в поток ошибок
     std::cerr << "[WARNING] " << details << std::endl;
 }
+
+void ErrorManager::printHistory() {
+    for (const Error& err : errorHistory) {
+        std::cerr << "[" << err.getTypeString() << "] " << err.what() << std::endl;
+    }
+}
