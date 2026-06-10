@@ -18,13 +18,6 @@
 #include <map>
 #include <memory>
 
-/**
- * @brief Вспомогательная функция для валидации имён переменных и функций.
- * @param name Проверяемое имя.
- * @param context Контекст для вывода понятной ошибки ("переменной" или "функции").
- * @param config Конфигурация с правилами парсинга.
- * @return true если имя корректно, false если обнаружены запрещённые символы.
- */
 bool validateNaming(const std::string& name, const std::string& context, const Config& config) {
     bool valid = true;
 

@@ -15,6 +15,15 @@ struct Config;
 class FunctManager;
 
 /**
+ * @brief Проверяет корректность имени переменной или функции.
+ * @param name Проверяемое имя.
+ * @param context Контекст для сообщения об ошибке ("переменной" или "функции").
+ * @param config Конфигурация с набором операторов и префиксом функций.
+ * @return true если имя корректно, false если обнаружены запрещённые символы.
+ */
+bool validateNaming(const std::string& name, const std::string& context, const Config& config);
+
+/**
  * @brief Строит дерево логического выражения из строки в формате ОПН.
  *
  * @param expression Строка в формате ОПН с пробелами-разделителями.
