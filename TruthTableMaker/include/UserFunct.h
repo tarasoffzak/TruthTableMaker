@@ -12,7 +12,7 @@
 
 // Опережающие объявления
 class ExprTree;
-class Parser;
+struct Config;
 
 /**
  * @struct UserFunction
@@ -56,25 +56,26 @@ public:
     FunctManager& operator=(const FunctManager&) = delete;
 
     /**
-     * @brief Загружает пользовательские функции из конфигурационного файла.
+     * @brief Загружает пользовательские функции из файла.
      *
-     * Читает файл построчно и использует переданный парсер для компиляции 
-     * каждой строки в структуру UserFunction, после чего регистрирует её.
+     * Читает файл построчно, пропускает пустые строки и комментарии (#).
+     * Каждую строку передаёт в parseUserFunction, результат регистрирует.
      * @param filePath Путь к файлу с определениями функций.
-     * @param parser Ссылка на объект парсера для разбора строк (ОПН).
+     * @param config Конфигурация, передаваемая в парсер ОПН для каждой функции.
      * @throws Error Если файл не найден или содержит синтаксические ошибки.
      */
-    void loadFromFile(const std::string& filePath, Parser& parser);
+    void loadFromFile(const std::string& filePath, const Config& config);
 
     /**
      * @brief Разбирает определение пользовательской функции из строки.
      *
      * Ожидается, что тело функции также описано в формате ОПН.
      * @param definition Строка с определением функции (например, "MYFUNC = x y &").
+     * @param config Конфигурация, передаваемая в парсер ОПН.
      * @return Готовая структура UserFunction, которую можно передать в FunctManager.
      * @throws Error При неверном формате определения функции.
      */
-    UserFunction parseUserFunction(const std::string& definition);
+    UserFunction parseUserFunction(const std::string& definition, const Config& config);
 
     /**
      * @brief Регистрирует новую функцию в системе вручную.
