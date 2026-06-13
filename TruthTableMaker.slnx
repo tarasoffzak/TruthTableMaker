@@ -3,5 +3,6 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="TruthTableMaker/TruthTableMaker.vcxproj" />
+  <Project Path="Tests/Tests.vcxproj" />
+  <Project Path="TruthTableMaker/TruthTableMaker.vcxproj" Id="ec19b82e-0d22-4988-be4c-fc933765fc6a" />
 </Solution>
