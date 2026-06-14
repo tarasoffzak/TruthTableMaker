@@ -1,0 +1,1 @@
+﻿A B $f_and C $f_or A C $f_xor $f_impl $f_not

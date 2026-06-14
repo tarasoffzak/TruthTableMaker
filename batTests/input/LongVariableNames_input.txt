@@ -1,0 +1,1 @@
+﻿first_logical_var_20 second_logical_var20 &

@@ -1,0 +1,5 @@
+﻿f_not = A !
+f_and = A B &
+f_or = A B |
+f_impl = A ! B |
+f_xor = A B $f_or A B $f_and $f_not $f_and
