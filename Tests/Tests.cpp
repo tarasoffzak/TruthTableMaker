@@ -526,7 +526,7 @@ namespace Tests
 
         static void assertTable(
             const std::vector<std::pair<Context, bool>>& table,
-            const std::vector<int>& expected)
+            const std::vector<bool>& expected)
         {
             Assert::AreEqual(expected.size(), table.size(), L"Table size mismatch");
             for (size_t i = 0; i < expected.size(); ++i) {
