@@ -35,77 +35,77 @@ namespace Tests
         }
 
     public:
-        // 1: Пустое выражение
+        // 1. Пустое выражение
         TEST_METHOD(EmptyExpression)
         {
             FunctManager fm;
             expectError("", fm, ErrorType::EVAL_ERROR);
         }
 
-        // 2: Одиночная константа
+        // 2. Одиночная константа
         TEST_METHOD(SingleConstant)
         {
             FunctManager fm;
             expectSuccess("1", fm);
         }
 
-        // 3: Одиночная переменная
+        // 3. Одиночная переменная
         TEST_METHOD(SingleVariable)
         {
             FunctManager fm;
             expectSuccess("A", fm);
         }
 
-        // 4: Бинарная операция (И)
+        // 4. Бинарная операция (И)
         TEST_METHOD(BinaryOpAnd)
         {
             FunctManager fm;
             expectSuccess("A B &", fm);
         }
 
-        // 5: Бинарная операция (ИЛИ)
+        // 5. Бинарная операция (ИЛИ)
         TEST_METHOD(BinaryOpOr)
         {
             FunctManager fm;
             expectSuccess("A B |", fm);
         }
 
-        // 6: Унарная операция (НЕ)
+        // 6. Унарная операция (НЕ)
         TEST_METHOD(UnaryOpNot)
         {
             FunctManager fm;
             expectSuccess("A !", fm);
         }
 
-        // 7: Сложное выражение
+        // 7. Сложное выражение
         TEST_METHOD(ComplexExpression)
         {
             FunctManager fm;
             expectSuccess("A 1 & B C & | !", fm);
         }
 
-        // 8: Нехватка аргументов для бинарного оператора
+        // 8. Нехватка аргументов для бинарного оператора
         TEST_METHOD(MissingArgsForBinaryOp)
         {
             FunctManager fm;
             expectError("A &", fm, ErrorType::EVAL_ERROR);
         }
 
-        // 9: Нехватка аргументов для унарного оператора
+        // 9. Нехватка аргументов для унарного оператора
         TEST_METHOD(MissingArgsForUnaryOp)
         {
             FunctManager fm;
             expectError("!", fm, ErrorType::EVAL_ERROR);
         }
 
-        // 10: Избыток элементов в стеке
+        // 10. Избыток элементов в стеке
         TEST_METHOD(ExcessStackElements)
         {
             FunctManager fm;
             expectError("A B C &", fm, ErrorType::EVAL_ERROR);
         }
 
-        // 11: Корректный вызов определённой функции
+        // 11. Корректный вызов определённой функции
         TEST_METHOD(ValidUserFunction)
         {
             FunctManager fm;
@@ -113,14 +113,14 @@ namespace Tests
             expectSuccess("A B $myfunc", fm);
         }
 
-        // 12: Вызов неопределённой функции
+        // 12. Вызов неопределённой функции
         TEST_METHOD(UndefinedFunction)
         {
             FunctManager fm;
             expectError("A B $unknownFunc", fm, ErrorType::SYNTAX_ERROR);
         }
 
-        // 13: Нехватка аргументов для функции
+        // 13. Нехватка аргументов для функции
         TEST_METHOD(MissingArgsForFunction)
         {
             FunctManager fm;
@@ -128,7 +128,7 @@ namespace Tests
             expectError("A $myfunc", fm, ErrorType::EVAL_ERROR);
         }
 
-        // 14: Некорректный префикс - после имени функции ("myfunc$")
+        // 14. Некорректный префикс - после имени функции ("myfunc$")
         TEST_METHOD(PrefixAfterName)
         {
             FunctManager fm;
@@ -136,7 +136,7 @@ namespace Tests
             expectError("A B myfunc$", fm, ErrorType::SYNTAX_ERROR);
         }
 
-        // 15: Некорректный префикс - пробел между $ и именем ("$ myfunc")
+        // 15. Некорректный префикс - пробел между $ и именем ("$ myfunc")
         TEST_METHOD(StandalonePrefixWithSpace)
         {
             FunctManager fm;
@@ -144,7 +144,7 @@ namespace Tests
             expectError("A B $ myfunc", fm, ErrorType::SYNTAX_ERROR);
         }
 
-        // 16: Некорректный префикс - дублирование ("$$myfunc")
+        // 16. Некорректный префикс - дублирование ("$$myfunc")
         TEST_METHOD(DuplicatedPrefix)
         {
             FunctManager fm;
@@ -152,14 +152,14 @@ namespace Tests
             expectError("A B $$myfunc", fm, ErrorType::SYNTAX_ERROR);
         }
 
-        // 17: Оператор склеен с именем переменной ("A&B")
+        // 17. Оператор склеен с именем переменной ("A&B")
         TEST_METHOD(OperatorGluedToVar)
         {
             FunctManager fm;
             expectError("A&B", fm, ErrorType::SYNTAX_ERROR);
         }
 
-        // 18: Оператор внутри имени функции ("$my&func")
+        // 18. Оператор внутри имени функции ("$my&func")
         TEST_METHOD(OperatorInsideFuncName)
         {
             FunctManager fm;
@@ -167,7 +167,7 @@ namespace Tests
             expectError("A B $my&func", fm, ErrorType::SYNTAX_ERROR);
         }
 
-        // 19: Недопустимый символ "%" - не оператор, не $, обрабатывается как переменная
+        // 19. Недопустимый символ "%" - не оператор, не $, обрабатывается как переменная
         //     Стек в итоге содержит 3 элемента -> EVAL_ERROR
         TEST_METHOD(InvalidCharacter)
         {
@@ -175,7 +175,7 @@ namespace Tests
             expectError("A B %", fm, ErrorType::EVAL_ERROR);
         }
 
-        // 20: Многосимвольные наименования переменных и функции
+        // 20. Многосимвольные наименования переменных и функции
         TEST_METHOD(MulticharNames)
         {
             FunctManager fm;
@@ -183,7 +183,7 @@ namespace Tests
             expectSuccess("alpha1 alpha2 alpha3 $testfunct", fm);
         }
 
-        // 21: Повторяющиеся имена переменных, функция вызывается дважды
+        // 21. Повторяющиеся имена переменных, функция вызывается дважды
         TEST_METHOD(RepeatedNames)
         {
             FunctManager fm;
@@ -191,7 +191,7 @@ namespace Tests
             expectSuccess("A A $func1 B $func1", fm);
         }
 
-        // 22: Имя переменной совпадает с именем функции
+        // 22. Имя переменной совпадает с именем функции
         TEST_METHOD(VarNameMatchesFuncName)
         {
             FunctManager fm;
@@ -199,7 +199,7 @@ namespace Tests
             expectSuccess("result A $result", fm);
         }
 
-        // 23: Более 10 уникальных переменных - дерево строится успешно
+        // 23. Более 10 уникальных переменных - дерево строится успешно
         //     (лимит на 10 переменных проверяется в generateTruthTable, не в parseExprRPN)
         TEST_METHOD(ManyVariables)
         {
@@ -210,7 +210,7 @@ namespace Tests
             );
         }
 
-        // 24: Функция без аргументов (тело - константа)
+        // 24. Функция без аргументов (тело - константа)
         TEST_METHOD(FunctionWithNoArgs)
         {
             FunctManager fm;
@@ -218,21 +218,21 @@ namespace Tests
             expectSuccess("$zero_arg_func", fm);
         }
 
-        // 25: Длинные имена переменных
+        // 25. Длинные имена переменных
         TEST_METHOD(LongVariableNames)
         {
             FunctManager fm;
             expectSuccess("first_logical_var_20 second_logical_var20 &", fm);
         }
 
-        // 26: Глубокая вложенность операторов
+        // 26. Глубокая вложенность операторов
         TEST_METHOD(DeepNesting)
         {
             FunctManager fm;
             expectSuccess("A ! B C D ! & ! | ! & !", fm);
         }
 
-        // 27: Пограничное условие - ровно 10 переменных (рекомендуемый лимит)
+        // 27. Пограничное условие - ровно 10 переменных (рекомендуемый лимит)
         TEST_METHOD(MaxRecommendedVariables)
         {
             FunctManager fm;
@@ -247,14 +247,14 @@ namespace Tests
     TEST_CLASS(ConstNodeTests)
     {
     public:
-        // 1: Значение константы = 0
+        // 1. Значение константы = 0
         TEST_METHOD(ConstFalse)
         {
             ConstNode node(false);
             Assert::IsFalse(node.evaluate(0), L"ConstNode(false) should evaluate to false");
         }
 
-        // 2: Значение константы = 1
+        // 2. Значение константы = 1
         TEST_METHOD(ConstTrue)
         {
             ConstNode node(true);
@@ -269,14 +269,14 @@ namespace Tests
     TEST_CLASS(VarNodeTests)
     {
     public:
-        // 1: Контекст с 0 на позиции переменной: A=0
+        // 1. Контекст с 0 на позиции переменной: A=0
         TEST_METHOD(VarZeroContext)
         {
             VarNode node(0); // переменная с индексом 0 (бит 0)
             Assert::IsFalse(node.evaluate(0), L"VarNode(0) with bit 0 = 0 should be false");
         }
 
-        // 2: Контекст с 1 на позиции переменной: A=1
+        // 2. Контекст с 1 на позиции переменной: A=1
         TEST_METHOD(VarOneContext)
         {
             VarNode node(0); // переменная с индексом 0 (бит 0)
@@ -304,7 +304,7 @@ namespace Tests
         }
 
     public:
-        // 1: Операция NOT: "1 !" = 0
+        // 1. Операция NOT: "1 !" = 0
         TEST_METHOD(OperNot)
         {
             FunctManager fm;
@@ -313,7 +313,7 @@ namespace Tests
             Assert::IsFalse(tree->evaluate(0), L"NOT 1 should be false");
         }
 
-        // 2: Операция AND: "1 0 &" = 0
+        // 2. Операция AND: "1 0 &" = 0
         TEST_METHOD(OperAnd)
         {
             FunctManager fm;
@@ -322,7 +322,7 @@ namespace Tests
             Assert::IsFalse(tree->evaluate(0), L"1 AND 0 should be false");
         }
 
-        // 3: Операция OR: "0 1 |" = 1
+        // 3. Операция OR: "0 1 |" = 1
         TEST_METHOD(OperOr)
         {
             FunctManager fm;
@@ -331,7 +331,7 @@ namespace Tests
             Assert::IsTrue(tree->evaluate(0), L"0 OR 1 should be true");
         }
 
-        // 4: Аргумент константа: "1 1 &" = 1
+        // 4. Аргумент константа: "1 1 &" = 1
         TEST_METHOD(OperArgConst)
         {
             FunctManager fm;
@@ -340,7 +340,7 @@ namespace Tests
             Assert::IsTrue(tree->evaluate(0), L"1 AND 1 should be true");
         }
 
-        // 5: Аргумент переменная: "A B |", A=0, B=0 = 0
+        // 5. Аргумент переменная: "A B |", A=0, B=0 = 0
         TEST_METHOD(OperArgVar)
         {
             FunctManager fm;
@@ -350,7 +350,7 @@ namespace Tests
             Assert::IsFalse(tree->evaluate(0), L"A(0) OR B(0) should be false");
         }
 
-        // 6: Аргумент узел-операции: "A B & !", A=1, B=1 = 0
+        // 6. Аргумент узел-операции: "A B & !", A=1, B=1 = 0
         TEST_METHOD(OperArgOperNode)
         {
             FunctManager fm;
@@ -360,7 +360,7 @@ namespace Tests
             Assert::IsFalse(tree->evaluate(3), L"NOT(A(1) AND B(1)) should be false");
         }
 
-        // 7: Аргумент узел-функции: "A B $myfunc 1 &", A=1, B=0 = 1
+        // 7. Аргумент узел-функции: "A B $myfunc 1 &", A=1, B=0 = 1
         //    myfunc = A B | - с A=1, B=0 вернёт 1
         TEST_METHOD(OperArgFunctNode)
         {
@@ -393,7 +393,7 @@ namespace Tests
         }
 
     public:
-        // 1: Функция из базисных операций: impl = A ! B |, "0 1 $impl" = 1
+        // 1. Функция из базисных операций: impl = A ! B |, "0 1 $impl" = 1
         TEST_METHOD(FuncBasicOps)
         {
             FunctManager fm;
@@ -403,7 +403,7 @@ namespace Tests
             Assert::IsTrue(tree->evaluate(0), L"impl(0,1): !0 OR 1 should be true");
         }
 
-        // 2: Унарная функция: not_f = A !, "1 $not_f" = 0
+        // 2. Унарная функция: not_f = A !, "1 $not_f" = 0
         TEST_METHOD(FuncUnary)
         {
             FunctManager fm;
@@ -413,7 +413,7 @@ namespace Tests
             Assert::IsFalse(tree->evaluate(0), L"not_f(1): !1 should be false");
         }
 
-        // 3: N-арная функция (3 аргумента): func3 = A B & C |, "1 0 1 $func3" = 1
+        // 3. N-арная функция (3 аргумента): func3 = A B & C |, "1 0 1 $func3" = 1
         TEST_METHOD(FuncNAry)
         {
             FunctManager fm;
@@ -423,7 +423,7 @@ namespace Tests
             Assert::IsTrue(tree->evaluate(0), L"func3(1,0,1): (1 AND 0) OR 1 should be true");
         }
 
-        // 4: Аргумент константа: f = A B &, "1 0 $f" = 0
+        // 4. Аргумент константа: f = A B &, "1 0 $f" = 0
         TEST_METHOD(FuncArgConst)
         {
             FunctManager fm;
@@ -433,7 +433,7 @@ namespace Tests
             Assert::IsFalse(tree->evaluate(0), L"f(1,0): 1 AND 0 should be false");
         }
 
-        // 5: Аргумент переменная: f = A B |, "X Y $f", X=1, Y=0 = 1
+        // 5. Аргумент переменная: f = A B |, "X Y $f", X=1, Y=0 = 1
         TEST_METHOD(FuncArgVar)
         {
             FunctManager fm;
@@ -444,7 +444,7 @@ namespace Tests
             Assert::IsTrue(tree->evaluate(1), L"f(X(1),Y(0)): 1 OR 0 should be true");
         }
 
-        // 6: Аргумент узел-операции: f = A B &, "X Y | 1 $f", X=0, Y=1 = 1
+        // 6. Аргумент узел-операции: f = A B &, "X Y | 1 $f", X=0, Y=1 = 1
         TEST_METHOD(FuncArgOperNode)
         {
             FunctManager fm;
@@ -455,7 +455,7 @@ namespace Tests
             Assert::IsTrue(tree->evaluate(2), L"f(X(0) OR Y(1), 1): 1 AND 1 should be true");
         }
 
-        // 7: Аргумент узел-функции: g = A !, f = A B &, "1 $g 1 $f" = 0
+        // 7. Аргумент узел-функции: g = A !, f = A B &, "1 $g 1 $f" = 0
         TEST_METHOD(FuncArgFunctNode)
         {
             FunctManager fm;
@@ -467,7 +467,7 @@ namespace Tests
             Assert::IsFalse(tree->evaluate(0), L"f(g(1),1): g(1)=0, 0 AND 1 should be false");
         }
 
-        // 8: Функция содержит подфункцию: sub = A !, main = A B $sub &, "1 0 $main" = 1
+        // 8. Функция содержит подфункцию: sub = A !, main = A B $sub &, "1 0 $main" = 1
         TEST_METHOD(FuncContainsSubFunc)
         {
             FunctManager fm;
@@ -479,7 +479,7 @@ namespace Tests
             Assert::IsTrue(tree->evaluate(0), L"main(1,0): 1 AND sub(0)=!0=1 should be true");
         }
 
-        // 9: Функция без аргументов: zero_arg_func = 1, "$zero_arg_func" = 1
+        // 9. Функция без аргументов: zero_arg_func = 1, "$zero_arg_func" = 1
         TEST_METHOD(FuncNoArgs)
         {
             FunctManager fm;
