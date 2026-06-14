@@ -489,4 +489,231 @@ namespace Tests
             Assert::IsTrue(tree->evaluate(0), L"zero_arg_func should return true");
         }
     };
+
+    // ========================================================================
+    // ExprTree::generateTruthTable
+    // ========================================================================
+
+    TEST_CLASS(GenerateTruthTableTests)
+    {
+    private:
+        static void setupFunction(FunctManager& fm, const std::string& def) {
+            Config cfg;
+            ErrorManager::clear();
+            fm.registerFunction(fm.parseUserFunction(def, cfg));
+        }
+
+        static std::vector<std::pair<Context, bool>> buildTable(const std::string& expr, FunctManager& fm) {
+            Config cfg;
+            ErrorManager::clear();
+            auto tree = parseExprRPN(expr, cfg, fm);
+            Assert::IsNotNull(tree.get(), L"Expected non-null tree");
+            return tree->generateTruthTable();
+        }
+
+        static void assertTable(
+            const std::vector<std::pair<Context, bool>>& table,
+            std::initializer_list<bool> expected)
+        {
+            Assert::AreEqual(expected.size(), table.size(), L"Table size mismatch");
+            size_t i = 0;
+            for (int exp : expected) {
+                std::wstring msg = L"row " + std::to_wstring(i);
+                Assert::AreEqual(exp != 0, table[i].second, msg.c_str());
+                ++i;
+            }
+        }
+
+        static void assertTable(
+            const std::vector<std::pair<Context, bool>>& table,
+            const std::vector<int>& expected)
+        {
+            Assert::AreEqual(expected.size(), table.size(), L"Table size mismatch");
+            for (size_t i = 0; i < expected.size(); ++i) {
+                std::wstring msg = L"row " + std::to_wstring(i);
+                Assert::AreEqual(expected[i] != 0, table[i].second, msg.c_str());
+            }
+        }
+
+    public:
+        // 1. Пустое дерево (корень = nullptr) : Error::EVAL_ERROR
+        TEST_METHOD(NullRoot)
+        {
+            try {
+                ExprTree tree(nullptr, {});
+                tree.generateTruthTable();
+                Assert::Fail(L"Expected Error to be thrown for null root");
+            } catch (const Error& e) {
+                Assert::IsTrue(e.getType() == ErrorType::EVAL_ERROR, L"Expected EVAL_ERROR");
+            }
+        }
+
+        // 2. Дерево-константа "1"
+        TEST_METHOD(SingleConstant)
+        {
+            FunctManager fm;
+            assertTable(buildTable("1", fm), {1});
+        }
+
+        // 3. Несколько констант "1 0 |"
+        TEST_METHOD(MultipleConstants)
+        {
+            FunctManager fm;
+            assertTable(buildTable("1 0 |", fm), {1});
+        }
+
+        // 4. Дерево-переменная "A"
+        TEST_METHOD(SingleVariable)
+        {
+            FunctManager fm;
+            assertTable(buildTable("A", fm), {0, 1});
+        }
+
+        // 5. Одна переменная с константой "A 1 &"
+        TEST_METHOD(OneVariableWithConst)
+        {
+            FunctManager fm;
+            assertTable(buildTable("A 1 &", fm), {0, 1});
+        }
+
+        // 6. Две переменные "A B |"
+        TEST_METHOD(TwoVariables)
+        {
+            FunctManager fm;
+            assertTable(buildTable("A B |", fm), {0, 1, 1, 1});
+        }
+
+        // 7. Пользовательская функция "A B $myfunc" (myfunc = A B & !)
+        TEST_METHOD(UserFunction)
+        {
+            FunctManager fm;
+            setupFunction(fm, "myfunc = A B & !");
+            assertTable(buildTable("A B $myfunc", fm), {1, 1, 1, 0});
+        }
+
+        // 8. Тавтология "A A ! |"
+        TEST_METHOD(Tautology)
+        {
+            FunctManager fm;
+            assertTable(buildTable("A A ! |", fm), {1, 1});
+        }
+
+        // 9. Противоречие "A A ! &"
+        TEST_METHOD(Contradiction)
+        {
+            FunctManager fm;
+            assertTable(buildTable("A A ! &", fm), {0, 0});
+        }
+
+        // 10. Двойное отрицание "A ! !"
+        TEST_METHOD(DoubleNegation)
+        {
+            FunctManager fm;
+            assertTable(buildTable("A ! !", fm), {0, 1});
+        }
+
+        // 11. Дублирующаяся переменная "A A &"
+        // A встречается дважды, но остаётся одной уникальной переменной
+        TEST_METHOD(DuplicateVariable)
+        {
+            FunctManager fm;
+            assertTable(buildTable("A A &", fm), {0, 1});
+        }
+
+        // 12. Глубокая вложенность операций "A ! B C D ! & ! | ! & !"
+        TEST_METHOD(DeepNesting)
+        {
+            FunctManager fm;
+            assertTable(buildTable("A ! B C D ! & ! | ! & !", fm),
+                        {1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1});
+        }
+
+        // 13. Пять пользовательских функций
+        TEST_METHOD(MultipleFunctions)
+        {
+            FunctManager fm;
+            setupFunction(fm, "f_not = A !");
+            setupFunction(fm, "f_and = A B &");
+            setupFunction(fm, "f_or = A B |");
+            setupFunction(fm, "f_impl = A ! B |");
+            setupFunction(fm, "f_xor = A B $f_or A B $f_and $f_not $f_and");
+            assertTable(
+                buildTable("A B $f_and C $f_or A C $f_xor $f_impl $f_not", fm),
+                {0, 0, 0, 0, 0, 1, 0, 1}
+            );
+        }
+
+        // 14. Пять переменных "A B & C D & | ! E &"
+        TEST_METHOD(FiveVariables)
+        {
+            FunctManager fm;
+            assertTable(buildTable("A B & C D & | ! E &", fm), {
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0
+            });
+        }
+
+        // 15. Повторная проверка глубокой вложенности (та же формула, что в тесте 12)
+        TEST_METHOD(DeepNestingRepeat)
+        {
+            FunctManager fm;
+            assertTable(buildTable("A ! B C D ! & ! | ! & !", fm),
+                        {1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1});
+        }
+
+        // 16. Функция из подфункций (XOR через f_or, f_and, f_not)
+        TEST_METHOD(FunctionFromSubfunctions)
+        {
+            FunctManager fm;
+            setupFunction(fm, "f_not = A !");
+            setupFunction(fm, "f_and = A B &");
+            setupFunction(fm, "f_or = A B |");
+            setupFunction(fm, "outer = A B $f_or A B $f_and $f_not $f_and");
+            assertTable(buildTable("A B $outer", fm), {0, 1, 1, 0});
+        }
+
+        // 17. Длинные имена переменных
+        TEST_METHOD(LongVariableNames)
+        {
+            FunctManager fm;
+            assertTable(buildTable("first_logical_var_20 second_logical_var20 &", fm),
+                        {0, 0, 0, 1});
+        }
+
+        // 18. Максимум рекомендуемых переменных (10) : 1024 строки
+        TEST_METHOD(MaxRecommendedVariables)
+        {
+            FunctManager fm;
+            std::vector<bool> expected(1024, 0);
+            expected[511] = 1;
+            assertTable(buildTable("A B & C & D & E & F & G & H & I & J ! &", fm), expected);
+        }
+
+        // 19. Функция без аргументов "$zero_arg_func" (zero_arg_func = 1)
+        TEST_METHOD(FunctionWithNoArgs)
+        {
+            FunctManager fm;
+            setupFunction(fm, "zero_arg_func = 1");
+            assertTable(buildTable("$zero_arg_func", fm), {1});
+        }
+
+        // 20. Превышение лимита переменных (11 > maxTruthTableVars=10) → Error::EVAL_ERROR
+        TEST_METHOD(TooManyVariables)
+        {
+            FunctManager fm;
+            Config cfg;
+            ErrorManager::clear();
+            // parseExprRPN строит дерево успешно — лимит проверяется только в generateTruthTable
+            auto tree = parseExprRPN(
+                "var1 var2 & var3 & var4 & var5 & var6 & var7 & var8 & var9 & var10 & var11 |",
+                cfg, fm);
+            Assert::IsNotNull(tree.get(), L"Tree with 11 variables should build successfully");
+            try {
+                tree->generateTruthTable();
+                Assert::Fail(L"Expected Error to be thrown for > maxTruthTableVars variables");
+            } catch (const Error& e) {
+                Assert::IsTrue(e.getType() == ErrorType::EVAL_ERROR, L"Expected EVAL_ERROR");
+            }
+        }
+    };
 }
