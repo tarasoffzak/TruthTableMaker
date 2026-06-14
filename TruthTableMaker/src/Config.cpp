@@ -61,6 +61,13 @@ void ConfigManager::parseCommandLine(int argc, char* argv[]) {
             // Сохраняем путь к файлу функций
             currentConfig.functionsFilePath = argv[i];
         }
+        // Проверяем флаг для пути к входному файлу с выражением
+        else if (arg == "--input" || arg == "-i") {
+            if (++i >= argc) {
+                throw Error(ErrorType::SYNTAX_ERROR, "Флаг '" + arg + "' требует значения");
+            }
+            currentConfig.inputFilePath = argv[i];
+        }
         // Если аргумент не распознан
         else {
             throw Error(ErrorType::SYNTAX_ERROR, "Неизвестный аргумент: '" + arg + "'");
