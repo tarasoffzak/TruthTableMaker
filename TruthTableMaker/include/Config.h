@@ -70,7 +70,8 @@ struct Config {
     ///@{
     
     /// Путь к файлу, в который будет сохранен результат (CSV-таблица истинности).
-    std::string outputFilePath = "truth_table.csv";
+    /// Пустая строка означает, что флаг -o не был задан.
+    std::string outputFilePath = "";
     
     /// Путь к файлу, содержащему определения пользовательских функций.
     std::string functionsFilePath = "functions.txt";
@@ -79,7 +80,8 @@ struct Config {
     char csvDelimiter = ',';
 
     /// Путь к файлу, содержащему входное логическое выражение в формате ОПН.
-    std::string inputFilePath = "input.txt";
+    /// Пустая строка означает интерактивный режим ввода из консоли.
+    std::string inputFilePath = "";
     ///@}
 };
 
