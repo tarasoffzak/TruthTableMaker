@@ -71,7 +71,7 @@ std::shared_ptr<ExprTree> parseExprRPN(
             Arity arity = config.getOperatorArity(token);
             // 3.2.2. Если элементов недостаточно, вызвать ошибку и завершить алгоритм.
             if (nodeStack.size() < arity) {
-                ErrorManager::add(ErrorType::SYNTAX_ERROR,
+                ErrorManager::add(ErrorType::EVAL_ERROR,
                     "Недостаточно операндов для оператора '" + token + "': "
                     "ожидается " + std::to_string(arity) +
                     ", доступно " + std::to_string(nodeStack.size()));
@@ -113,7 +113,7 @@ std::shared_ptr<ExprTree> parseExprRPN(
             const UserFunction* func = functManager.getFunction(funcName);
             Arity arity = func->body->getVariables().size();
             if (nodeStack.size() < arity) {
-                ErrorManager::add(ErrorType::SYNTAX_ERROR,
+                ErrorManager::add(ErrorType::EVAL_ERROR,
                     "Недостаточно аргументов для функции '" + funcName + "': "
                     "ожидается " + std::to_string(arity) +
                     ", доступно " + std::to_string(nodeStack.size()));
@@ -153,7 +153,7 @@ std::shared_ptr<ExprTree> parseExprRPN(
     // 4. Проверить количество элементов, оставшихся в стеке.
     // 5. Если в стеке находится не один элемент, вызвать ошибку и завершить алгоритм.
     if (nodeStack.size() != 1) {
-        ErrorManager::add(ErrorType::SYNTAX_ERROR,
+        ErrorManager::add(ErrorType::EVAL_ERROR,
             "Некорректное выражение ОПН: после разбора в стеке осталось " +
             std::to_string(nodeStack.size()) + " элемент(ов), ожидался 1");
     }
