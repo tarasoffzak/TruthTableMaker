@@ -41,7 +41,7 @@ std::vector<std::pair<Context, bool>> ExprTree::generateTruthTable() const {
     // 3. Проверить, что количество переменных не превышает допустимый предел.
     if (n > maxTruthTableVars) {
         ErrorManager::raise(ErrorType::EVAL_ERROR,
-            "Превышение лимита количества переменных (" + std::to_string(n) + "/" std::to_string(maxTruthTableVars) ")" );
+            "Превышение лимита количества переменных (" + std::to_string(n) + "/" + std::to_string(maxTruthTableVars) + ")" );
     }
 
     // 4. Вычислить число строк таблицы как 2^n.
