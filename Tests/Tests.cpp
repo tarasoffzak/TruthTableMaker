@@ -231,5 +231,12 @@ namespace Tests
             FunctManager fm;
             expectSuccess("A ! B C D ! & ! | ! & !", fm);
         }
+
+        // 27: Пограничное условие — ровно 10 переменных (рекомендуемый лимит)
+        TEST_METHOD(MaxRecommendedVariables)
+        {
+            FunctManager fm;
+            expectSuccess("A B & C & D & E & F & G & H & I & J &", fm);
+        }
     };
 }
