@@ -8,5 +8,12 @@
 #define PCH_H
 
 // add headers that you want to pre-compile here
+#include <string>
+#include <memory>
+#include "Config.h"
+#include "Error.h"
+#include "ExprTree.h"
+#include "ParseExpr.h"
+#include "UserFunct.h"
 
 #endif //PCH_H
