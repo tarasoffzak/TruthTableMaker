@@ -30,26 +30,34 @@ const std::vector<std::string>& ExprTree::getVariables() const {
 }
 
 std::vector<std::pair<Context, bool>> ExprTree::generateTruthTable() const {
-    // 1. Определить количество переменных.
+    // 1. Убедиться, что корень дерева не является нулевым указателем.
+    if (!root) {
+        ErrorManager::raise(ErrorType::EVAL_ERROR, "Нельзя сгенерировать таблицу, так как дерево пустое");
+    }
+
+    // 2. Определить количество переменных.
     const size_t n = variableNames.size();
 
-    // 2. Проверить, что количество переменных не превышает допустимый предел.
-    if (n > maxTruthTableVars) return {};
+    // 3. Проверить, что количество переменных не превышает допустимый предел.
+    if (n > maxTruthTableVars) {
+        ErrorManager::raise(ErrorType::EVAL_ERROR,
+            "Превышение лимита количества переменных (" + std::to_string(n) + "/" std::to_string(maxTruthTableVars) ")" );
+    }
 
-    // 3. Вычислить число строк таблицы как 2^n.
+    // 4. Вычислить число строк таблицы как 2^n.
     const Context rowCount = Context(1) << n;
 
-    // 4. Создать результирующий вектор пар (контекст, результат).
+    // 5. Создать результирующий вектор пар (контекст, результат).
     std::vector<std::pair<Context, bool>> table;
     table.reserve(rowCount);
 
-    // 5. Перебрать все возможные комбинации значений переменных.
+    // 6. Перебрать все возможные комбинации значений переменных.
     for (Context ctx = 0; ctx < rowCount; ++ctx) {
         // 5.1. Вычислить значение выражения для текущего контекста.
         // 5.2. Добавить пару (контекст, результат) в таблицу.
         table.emplace_back(ctx, root->evaluate(ctx));
     }
 
-    // 6. Вернуть заполненную таблицу истинности.
+    // 7. Вернуть заполненную таблицу истинности.
     return table;
 }
