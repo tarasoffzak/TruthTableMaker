@@ -1,0 +1,2 @@
+# This file contains only a comment, no expression
+# Empty expression should trigger an error

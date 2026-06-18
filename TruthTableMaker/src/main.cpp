@@ -88,6 +88,27 @@ static void saveToFile(
 }
 
 /**
+ * @brief Сохраняет лог ошибок в текстовый файл.
+ *
+ * @param basePath Базовый путь без расширения. Расширение .txt добавляется автоматически.
+ */
+static void saveErrorLog(const std::string& basePath)
+{
+    if (basePath.empty()) return;
+
+    std::string errorLogPath = basePath + ".txt";
+    std::ofstream errLog(errorLogPath);
+    if (errLog.is_open()) {
+        const auto& errorHistory = ErrorManager::getHistory();
+        for (const auto& err : errorHistory) {
+            errLog << "[" << err.getTypeString() << "] " << err.what() << '\n';
+        }
+        errLog.close();
+        std::cout << "Error log saved: " << errorLogPath << '\n';
+    }
+}
+
+/**
  * @brief Точка входа.
  *
  * Разбирает аргументы командной строки через ConfigManager, затем выбирает режим:
@@ -110,8 +131,9 @@ static void saveToFile(
  * @return 0 при успехе, 1 при ошибке.
  */
 int main(int argc, char* argv[]) {
+    ConfigManager cm;
+
     try {
-        ConfigManager cm;
         cm.parseCommandLine(argc, argv);
         const Config& cfg = cm.getConfig();
 
@@ -162,6 +184,7 @@ int main(int argc, char* argv[]) {
         auto tree = parseExprRPN(expression, cfg, fm);
         if (!tree) {
             ErrorManager::printHistory();
+            saveErrorLog(cfg.outputFilePath);
             return 1;
         }
         const auto table = tree->generateTruthTable();
@@ -173,8 +196,9 @@ int main(int argc, char* argv[]) {
             printTable(vars, table);
 
             if (!cfg.outputFilePath.empty()) {
-                // -o задан явно: пишем в файл без вопроса
-                saveToFile(cfg.outputFilePath, cfg.csvDelimiter, vars, table);
+                // -o задан явно: пишем в файл без вопроса (добавляем .csv)
+                std::string csvPath = cfg.outputFilePath + ".csv";
+                saveToFile(csvPath, cfg.csvDelimiter, vars, table);
             } else {
                 std::cout << "\nSave to file? (path or Enter to skip): ";
                 std::string savePath;
@@ -188,12 +212,14 @@ int main(int argc, char* argv[]) {
                 // -o не задан: выводим в консоль
                 printTable(vars, table);
             } else {
-                std::ofstream out(cfg.outputFilePath);
+                // -o задан: пишем CSV (добавляем .csv)
+                std::string csvPath = cfg.outputFilePath + ".csv";
+                std::ofstream out(csvPath);
                 if (!out.is_open())
-                    throw Error(ErrorType::FILE_ERROR, "Не удалось открыть выходной файл: " + cfg.outputFilePath);
+                    throw Error(ErrorType::FILE_ERROR, "Не удалось открыть выходной файл: " + csvPath);
                 writeCSV(out, cfg.csvDelimiter, vars, table);
                 out.close();
-                std::cout << "OK: " << cfg.outputFilePath << '\n';
+                std::cout << "OK: " << csvPath << '\n';
             }
         }
 
@@ -201,9 +227,11 @@ int main(int argc, char* argv[]) {
 
     } catch (const Error& e) {
         std::cerr << "Error [" << e.getTypeString() << "]: " << e.what() << '\n';
+        saveErrorLog(cm.getConfig().outputFilePath);
         return 1;
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << '\n';
+        saveErrorLog(cm.getConfig().outputFilePath);
         return 1;
     }
 }

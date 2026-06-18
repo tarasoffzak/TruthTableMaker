@@ -22,7 +22,7 @@ for %%f in (%INPUT_DIR%\*_input.txt) do (
     set "tname=%%~nf"
     set "tname=!tname:_input=!"
 
-    set "ARGS=-i %%f -o %OUTPUT_DIR%\!tname!_out.csv"
+    set "ARGS=-i %%f -o %OUTPUT_DIR%\!tname!_out"
     if exist "%FUNC_DIR%\!tname!_functions.txt" (
         set "ARGS=!ARGS! -f %FUNC_DIR%\!tname!_functions.txt"
     )
