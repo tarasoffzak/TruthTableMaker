@@ -99,7 +99,7 @@ void ConfigManager::loadFromFile(const std::string& filePath) {
         // Ищем разделитель '=' между ключом и значением
         std::size_t delimPos = line.find('=');
         if (delimPos == std::string::npos) {
-            ErrorManager::raise(ErrorType::SYNTAX_ERROR, "Неверный формат строки " + std::to_string(lineNumber) + " (ожидается key=value)");
+            ErrorManager::raise(ErrorType::CONFIG_ERROR, "Неверный формат строки " + std::to_string(lineNumber) + " (ожидается key=value)");
         }
 
         // Извлекаем ключ и значение, удаляем пробелы
@@ -118,13 +118,13 @@ void ConfigManager::loadFromFile(const std::string& filePath) {
         else if (key == "csv_delimiter") {
             // Разделитель должен быть ровно одним символом
             if (value.empty()) {
-                ErrorManager::raise(ErrorType::SYNTAX_ERROR, "csv_delimiter не может быть пустым (строка " + std::to_string(lineNumber) + ")");
+                ErrorManager::raise(ErrorType::CONFIG_ERROR, "csv_delimiter не может быть пустым (строка " + std::to_string(lineNumber) + ")");
             }
             currentConfig.csvDelimiter = value[0];
         }
         else {
             // Неизвестный ключ — выбрасываем ошибку
-            ErrorManager::raise(ErrorType::SYNTAX_ERROR, "Неизвестный ключ конфигурации '" + key + "' в строке " + std::to_string(lineNumber));
+            ErrorManager::raise(ErrorType::CONFIG_ERROR, "Неизвестный ключ конфигурации '" + key + "' в строке " + std::to_string(lineNumber));
         }
     }
 }
