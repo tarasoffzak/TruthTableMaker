@@ -36,58 +36,83 @@ const Config& ConfigManager::getConfig() const {
     return currentConfig;
 }
 
-void ConfigManager::parseCommandLine(int argc, char* argv[]) {
-    // Проходим по всем аргументам командной строки (начиная с индекса 1, т.к. индекс 0 — имя программы)
-    for (int i = 1; i < argc; ++i) {
-        const std::string arg = argv[i];
+void ConfigManager::applySetting(const std::string& key, const std::string& value) {
+    // Обрабатываем известные ключи конфигурации
+    if (key == "output_file") {
+        currentConfig.outputFilePath = value;
+    }
+    else if (key == "functions_file") {
+        currentConfig.functionsFilePath = value;
+    }
+    else if (key == "input_file") {
+        currentConfig.inputFilePath = value;
+    }
+    else if (key == "csv_delimiter") {
+        // Разделитель должен быть ровно одним символом
+        if (value.empty()) {
+            ErrorManager::raise(ErrorType::CONFIG_ERROR, "csv_delimiter не может быть пустым");
+        }
+        currentConfig.csvDelimiter = value[0];
+    }
+    else {
+        // Неизвестный ключ — выбрасываем ошибку
+        ErrorManager::raise(ErrorType::CONFIG_ERROR, "Неизвестный ключ конфигурации '" + key + "'");
+    }
+}
 
-        // Проверяем флаг для пути к выходному файлу
-        if (arg == "--output" || arg == "-o") {
-            // Переходим к следующему аргументу (значению флага)
-            if (++i >= argc) {
-                // Если значения нет, выбрасываем ошибку
-                ErrorManager::raise(ErrorType::SYNTAX_ERROR, "Флаг '" + arg + "' требует значения");
-            }
-            // Сохраняем путь к выходному файлу
-            currentConfig.outputFilePath = argv[i];
+void ConfigManager::parseCommandLine(int argc, char* argv[]) {
+    // Параметры командной строки имеют приоритет над файлом конфигурации
+    // независимо от порядка флагов. Поэтому сначала собираем все настройки
+    // из аргументов, и только потом загружаем конфиг, а CLI-значения
+    // применяем поверх него, чтобы они всегда потому что ни приоритет.
+    std::string configPath;                                // путь из флага -c (пустой — флаг не задан)
+    std::vector<std::pair<std::string, std::string>> cliSettings; // настройки CLI в виде "ключ-значение"
+
+    // Проходим по всем аргументам (с индекса 1, т.к. индекс 0 — имя программы).
+    // Все поддерживаемые флаги требуют значение, поэтому сразу берём следующий
+    // аргумент как значение текущего флага.
+    for (int i = 1; i < argc; ++i) {
+        const std::string flag = argv[i];
+
+        if (++i >= argc) {
+            ErrorManager::raise(ErrorType::CONFIG_ERROR, "Флаг '" + flag + "' требует значения");
         }
-        // Проверяем флаг для пути к файлу пользовательских функций
-        else if (arg == "--functions" || arg == "-f") {
-            // Переходим к следующему аргументу (значению флага)
-            if (++i >= argc) {
-                // Если значения нет, выбрасываем ошибку
-                ErrorManager::raise(ErrorType::SYNTAX_ERROR, "Флаг '" + arg + "' требует значения");
-            }
-            // Сохраняем путь к файлу функций
-            currentConfig.functionsFilePath = argv[i];
+        const std::string value = argv[i];
+
+        if (flag == "--config" || flag == "-c") {
+            configPath = value;
         }
-        // Проверяем флаг для пути к входному файлу с выражением
-        else if (arg == "--input" || arg == "-i") {
-            if (++i >= argc) {
-                ErrorManager::raise(ErrorType::SYNTAX_ERROR, "Флаг '" + arg + "' требует значения");
-            }
-            currentConfig.inputFilePath = argv[i];
+        else if (flag == "--output" || flag == "-o") {
+            cliSettings.emplace_back("output_file", value);
         }
-        // Если аргумент не распознан
+        else if (flag == "--functions" || flag == "-f") {
+            cliSettings.emplace_back("functions_file", value);
+        }
+        else if (flag == "--input" || flag == "-i") {
+            cliSettings.emplace_back("input_file", value);
+        }
         else {
-            ErrorManager::raise(ErrorType::SYNTAX_ERROR, "Неизвестный аргумент: '" + arg + "'");
+            ErrorManager::raise(ErrorType::CONFIG_ERROR, "Неизвестный аргумент: '" + flag + "'");
         }
+    }
+
+    // Сначала применяем файл конфигурации (если задан),
+    if (!configPath.empty()) {
+        loadFromFile(configPath);
+    }
+    // затем — параметры командной строки, перекрывая значения из файла.
+    for (const auto& [key, value] : cliSettings) {
+        applySetting(key, value);
     }
 }
 
 
-void ConfigManager::loadFromFile(const std::string& filePath) {
-    // Открываем файл конфигурации для чтения
-    std::ifstream file(filePath);
-    if (!file.is_open()) {
-        ErrorManager::raise(ErrorType::FILE_ERROR, "Не удалось открыть файл конфигурации: " + filePath);
-    }
-
+void ConfigManager::parseFile(std::istream& in) {
     std::string line;
     uint32_t lineNumber = 0;
 
     // Читаем конфигурацию построчно
-    while (std::getline(file, line)) {
+    while (std::getline(in, line)) {
         lineNumber++;
         trim(line);
 
@@ -108,23 +133,23 @@ void ConfigManager::loadFromFile(const std::string& filePath) {
         trim(key);
         trim(value);
 
-        // Обрабатываем известные ключи конфигурации
-        if (key == "output_file") {
-            currentConfig.outputFilePath = value;
+        // Пустой ключ (строка вида "=value") — некорректен
+        if (key.empty()) {
+            ErrorManager::raise(ErrorType::CONFIG_ERROR, "Пустой ключ в строке " + std::to_string(lineNumber));
         }
-        else if (key == "functions_file") {
-            currentConfig.functionsFilePath = value;
-        }
-        else if (key == "csv_delimiter") {
-            // Разделитель должен быть ровно одним символом
-            if (value.empty()) {
-                ErrorManager::raise(ErrorType::CONFIG_ERROR, "csv_delimiter не может быть пустым (строка " + std::to_string(lineNumber) + ")");
-            }
-            currentConfig.csvDelimiter = value[0];
-        }
-        else {
-            // Неизвестный ключ — выбрасываем ошибку
-            ErrorManager::raise(ErrorType::CONFIG_ERROR, "Неизвестный ключ конфигурации '" + key + "' в строке " + std::to_string(lineNumber));
-        }
+
+        // Интерпретируем пару «ключ-значение» через общий обработчик
+        applySetting(key, value);
     }
+}
+
+void ConfigManager::loadFromFile(const std::string& filePath) {
+    // Открываем файл конфигурации для чтения
+    std::ifstream file(filePath);
+    if (!file.is_open()) {
+        ErrorManager::raise(ErrorType::FILE_ERROR, "Не удалось открыть файл конфигурации: " + filePath);
+    }
+
+    // Разбор содержимого делегируем parseFile
+    parseFile(file);
 }

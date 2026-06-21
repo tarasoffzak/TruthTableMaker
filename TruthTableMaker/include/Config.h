@@ -9,6 +9,7 @@
 #include <string>
 #include <map>
 #include <cstdint>
+#include <iosfwd>
 #include "Types.h"
 
 /**
@@ -96,6 +97,29 @@ struct Config {
 class ConfigManager {
 private:
     Config currentConfig; ///< Внутренний объект текущих настроек.
+
+    /**
+     * @brief Применяет одну пару "ключ-значение" к текущей конфигурации.
+     *
+     * Единая интерпретация настроек, используемая как при загрузке из файла (loadFromFile)
+     * так и при разборе аргументов командной строки.
+     * @param key Имя настройки (например, "output_file").
+     * @param value Значение настройки.
+     * @throws Error Выбрасывает CONFIG_ERROR при неизвестном ключе или некорректном значении.
+     */
+    void applySetting(const std::string& key, const std::string& value);
+
+    /**
+     * @brief Разбирает содержимое конфигурации из потока.
+     *
+     * Читает поток построчно, пропускает пустые строки и комментарии (#),
+     * разбирает строки формата key=value и применяет их через applySetting.
+     * Открытие файла и обработка ошибок ввода-вывода выполняются вызывающей
+     * стороной (loadFromFile) - функция работает с уже открытым потоком.
+     * @param in Входной поток с содержимым конфигурации.
+     * @throws Error Выбрасывает CONFIG_ERROR при неверном формате строки.
+     */
+    void parseFile(std::istream& in);
 
 public:
     /**
