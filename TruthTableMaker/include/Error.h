@@ -1,6 +1,6 @@
 /**
  * @file Error.h
- * @brief Объявление типов ошибок, класса исключения Error и статического менеджера ErrorManager.
+ * @brief Объявление типов ошибок, класса исключения Error и пространства имён ErrorManager.
  */
 
 #ifndef ERROR_H
@@ -54,23 +54,14 @@ public:
 };
 
 /**
- * @class ErrorManager
- * @brief Менеджер для централизованной обработки и накопления ошибок.
+ * @namespace ErrorManager
+ * @brief Пространство имён для централизованной обработки и накопления ошибок.
  *
- * Предоставляет статические методы для регистрации ошибок, их накопления
+ * Предоставляет свободные функции для регистрации ошибок, их накопления
  * в памяти и принудительного прерывания работы (через исключения).
+ * Внутреннее хранилище истории скрыто в анонимном namespace (Error.cpp).
  */
-class ErrorManager {
-private:
-    /**
-     * @brief Внутреннее хранилище накопленных ошибок. 
-     */
-    static std::vector<Error> errorHistory;
-
-public:
-    // Запрещаем создание объектов этого класса (класс-утилита)
-    ErrorManager() = delete;
-
+namespace ErrorManager {
     /**
      * @brief Регистрирует ошибку и выбрасывает исключение.
      *
@@ -79,42 +70,42 @@ public:
      * @param details Подробное описание.
      * @throws Error Всегда выбрасывает исключение.
      */
-    static void raise(ErrorType type, const std::string& details);
+    void raise(ErrorType type, const std::string& details);
 
     /**
      * @brief Просто добавляет ошибку в историю без прерывания программы.
      * @param type Тип ошибки.
      * @param details Подробное описание.
      */
-    static void add(ErrorType type, const std::string& details);
+    void add(ErrorType type, const std::string& details);
 
     /**
      * @brief Проверяет, были ли зафиксированы ошибки.
      * @return true, если есть хотя бы одна ошибка, иначе false.
      */
-    static bool hasErrors();
+    bool hasErrors();
 
     /**
      * @brief Возвращает список всех накопленных ошибок.
      * @return Константная ссылка на вектор с историю ошибок.
      */
-    static const std::vector<Error>& getHistory();
+    const std::vector<Error>& getHistory();
 
     /**
      * @brief Очищает историю ошибок.
      */
-    static void clear();
+    void clear();
 
     /**
      * @brief Логирует предупреждение (не сохраняется в истории ошибок).
      * @param details Текст предупреждения.
      */
-    static void warning(const std::string& details);
+    void warning(const std::string& details);
 
     /**
      * @brief Выводит все накопленные ошибки из истории в поток ошибок.
      */
-    static void printHistory();
-};
+    void printHistory();
+}
 
 #endif // ERROR_H

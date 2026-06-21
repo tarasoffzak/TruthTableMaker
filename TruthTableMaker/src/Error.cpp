@@ -23,40 +23,47 @@ std::string Error::getTypeString() const {
 }
 
 // ============================================================================
-// Реализация класса ErrorManager
+// Реализация пространства имён ErrorManager
 // ============================================================================
 
-// Инициализация статического члена класса (обязательно в .cpp файле)
-std::vector<Error> ErrorManager::errorHistory;
+namespace {
+    // Внутреннее хранилище накопленных ошибок.
+    // Скрыто в анонимном namespace — недоступно за пределами этой единицы трансляции.
+    std::vector<Error> errorHistory;
+}
 
-void ErrorManager::raise(ErrorType type, const std::string& details) {
+namespace ErrorManager {
+
+void raise(ErrorType type, const std::string& details) {
     add(type, details); // Сначала сохраняем в историю
     throw Error(type, details); // Затем прерываем выполнение
 }
 
-void ErrorManager::add(ErrorType type, const std::string& details) {
+void add(ErrorType type, const std::string& details) {
     errorHistory.emplace_back(type, details);
 }
 
-bool ErrorManager::hasErrors() {
+bool hasErrors() {
     return !errorHistory.empty();
 }
 
-const std::vector<Error>& ErrorManager::getHistory() {
+const std::vector<Error>& getHistory() {
     return errorHistory;
 }
 
-void ErrorManager::clear() {
+void clear() {
     errorHistory.clear();
 }
 
-void ErrorManager::warning(const std::string& details) {
+void warning(const std::string& details) {
     // Предупреждения не ломают программу, просто выводим их в поток ошибок
     std::cerr << "[WARNING] " << details << std::endl;
 }
 
-void ErrorManager::printHistory() {
+void printHistory() {
     for (const Error& err : errorHistory) {
         std::cerr << "[" << err.getTypeString() << "] " << err.what() << std::endl;
     }
 }
+
+} // namespace ErrorManager
