@@ -85,6 +85,7 @@
     <ClCompile Include="src\ExprTree.cpp" />
     <ClCompile Include="src\Nodes.cpp" />
     <ClCompile Include="src\ParseExpr.cpp" />
+    <ClCompile Include="src\TableOutput.cpp" />
     <ClCompile Include="src\UserFunct.cpp" />
     <ClCompile Include="src\Utils.cpp" />
     <ClCompile Include="src\main.cpp" />

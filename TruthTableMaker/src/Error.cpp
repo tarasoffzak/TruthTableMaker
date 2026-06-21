@@ -1,4 +1,5 @@
 #include "Error.h"
+#include <fstream>
 #include <iostream>
 
 // ============================================================================
@@ -63,6 +64,18 @@ void warning(const std::string& details) {
 void printHistory(std::ostream& os) {
     for (const Error& err : errorHistory) {
         os << "[" << err.getTypeString() << "] " << err.what() << '\n';
+    }
+}
+
+void saveToFile(const std::string& basePath) {
+    if (basePath.empty()) return;
+
+    std::string errorLogPath = basePath + ".txt";
+    std::ofstream errLog(errorLogPath);
+    if (errLog.is_open()) {
+        printHistory(errLog);
+        errLog.close();
+        std::cout << "Error log saved: " << errorLogPath << '\n';
     }
 }
 

@@ -108,6 +108,14 @@ namespace ErrorManager {
      * @param os Поток для вывода. По умолчанию std::cerr.
      */
     void printHistory(std::ostream& os = std::cerr);
+
+    /**
+     * @brief Сохраняет историю ошибок в текстовый файл.
+     *
+     * Если basePath пуст — ничего не делает. К пути добавляется расширение .txt.
+     * @param basePath Базовый путь без расширения.
+     */
+    void saveToFile(const std::string& basePath);
 }
 
 #endif // ERROR_H

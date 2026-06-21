@@ -6,6 +6,8 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+#include <cstdint>
+
 /**
  * @enum OperatorType
  * @brief Поддерживаемые базисные логические операции.

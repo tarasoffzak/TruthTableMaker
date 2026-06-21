@@ -12,98 +12,13 @@
 #include "Error.h"
 #include "ExprTree.h"
 #include "ParseExpr.h"
+#include "TableOutput.h"
 #include "UserFunct.h"
 #include "Utils.h"
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
-
-/**
- * @brief Записывает таблицу истинности в CSV-поток.
- *
- * Первая строка — заголовок: имена переменных + "result".
- * Каждая последующая строка — одна комбинация значений переменных и результат.
- *
- * @param out    Выходной поток (файл или stdout).
- * @param delim  Символ-разделитель столбцов.
- * @param vars   Упорядоченный список имён переменных.
- * @param table  Таблица: пары (контекст-битмаска, значение выражения).
- */
-static void writeCSV(
-    std::ostream& out,
-    char delim,
-    const std::vector<std::string>& vars,
-    const std::vector<std::pair<Context, bool>>& table)
-{
-    const size_t n = vars.size();
-    for (size_t i = 0; i < n; ++i) out << vars[i] << delim;
-    out << "result\n";
-    for (const auto& [ctx, val] : table) {
-        // Бит i контекста = значение переменной с индексом i
-        for (size_t i = 0; i < n; ++i) out << ((ctx >> i) & 1) << delim;
-        out << (val ? 1 : 0) << '\n';
-    }
-}
-
-/**
- * @brief Выводит таблицу истинности в stdout с табуляцией между столбцами.
- *
- * @param vars   Упорядоченный список имён переменных.
- * @param table  Таблица: пары (контекст-битмаска, значение выражения).
- */
-static void printTable(
-    const std::vector<std::string>& vars,
-    const std::vector<std::pair<Context, bool>>& table)
-{
-    const size_t n = vars.size();
-    for (size_t i = 0; i < n; ++i) std::cout << vars[i] << '\t';
-    std::cout << "result\n";
-    for (const auto& [ctx, val] : table) {
-        for (size_t i = 0; i < n; ++i) std::cout << ((ctx >> i) & 1) << '\t';
-        std::cout << (val ? 1 : 0) << '\n';
-    }
-}
-
-/**
- * @brief Сохраняет таблицу истинности в CSV-файл.
- *
- * @param path   Путь к выходному файлу.
- * @param delim  Символ-разделитель столбцов.
- * @param vars   Упорядоченный список имён переменных.
- * @param table  Таблица: пары (контекст-битмаска, значение выражения).
- * @throws Error Если файл не удалось открыть для записи.
- */
-static void saveToFile(
-    const std::string& path,
-    char delim,
-    const std::vector<std::string>& vars,
-    const std::vector<std::pair<Context, bool>>& table)
-{
-    std::ofstream out(path);
-    if (!out.is_open())
-        ErrorManager::raise(ErrorType::FILE_ERROR, "Не удалось открыть выходной файл: " + path);
-    writeCSV(out, delim, vars, table);
-    std::cout << "Saved: " << path << '\n';
-}
-
-/**
- * @brief Сохраняет лог ошибок в текстовый файл.
- *
- * @param basePath Базовый путь без расширения. Расширение .txt добавляется автоматически.
- */
-static void saveErrorLog(const std::string& basePath)
-{
-    if (basePath.empty()) return;
-
-    std::string errorLogPath = basePath + ".txt";
-    std::ofstream errLog(errorLogPath);
-    if (errLog.is_open()) {
-        ErrorManager::printHistory(errLog);
-        errLog.close();
-        std::cout << "Error log saved: " << errorLogPath << '\n';
-    }
-}
 
 /**
  * @brief Точка входа.
@@ -181,7 +96,7 @@ int main(int argc, char* argv[]) {
         auto tree = parseExprRPN(expression, cfg, fm);
         if (!tree) {
             ErrorManager::printHistory();
-            saveErrorLog(cfg.outputFilePath);
+            ErrorManager::saveToFile(cfg.outputFilePath);
             return 1;
         }
         const auto table = tree->generateTruthTable();
@@ -224,11 +139,11 @@ int main(int argc, char* argv[]) {
 
     } catch (const Error& e) {
         std::cerr << "Error [" << e.getTypeString() << "]: " << e.what() << '\n';
-        saveErrorLog(cm.getConfig().outputFilePath);
+        ErrorManager::saveToFile(cm.getConfig().outputFilePath);
         return 1;
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << '\n';
-        saveErrorLog(cm.getConfig().outputFilePath);
+        ErrorManager::saveToFile(cm.getConfig().outputFilePath);
         return 1;
     }
 }
