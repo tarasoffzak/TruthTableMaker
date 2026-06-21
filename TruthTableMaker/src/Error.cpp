@@ -60,9 +60,9 @@ void warning(const std::string& details) {
     std::cerr << "[WARNING] " << details << std::endl;
 }
 
-void printHistory() {
+void printHistory(std::ostream& os) {
     for (const Error& err : errorHistory) {
-        std::cerr << "[" << err.getTypeString() << "] " << err.what() << std::endl;
+        os << "[" << err.getTypeString() << "] " << err.what() << '\n';
     }
 }
 

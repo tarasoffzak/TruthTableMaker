@@ -6,6 +6,7 @@
 #ifndef ERROR_H
 #define ERROR_H
 
+#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -103,9 +104,10 @@ namespace ErrorManager {
     void warning(const std::string& details);
 
     /**
-     * @brief Выводит все накопленные ошибки из истории в поток ошибок.
+     * @brief Выводит все накопленные ошибки из истории в заданный поток.
+     * @param os Поток для вывода. По умолчанию std::cerr.
      */
-    void printHistory();
+    void printHistory(std::ostream& os = std::cerr);
 }
 
 #endif // ERROR_H

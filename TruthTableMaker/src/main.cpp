@@ -99,10 +99,7 @@ static void saveErrorLog(const std::string& basePath)
     std::string errorLogPath = basePath + ".txt";
     std::ofstream errLog(errorLogPath);
     if (errLog.is_open()) {
-        const auto& errorHistory = ErrorManager::getHistory();
-        for (const auto& err : errorHistory) {
-            errLog << "[" << err.getTypeString() << "] " << err.what() << '\n';
-        }
+        ErrorManager::printHistory(errLog);
         errLog.close();
         std::cout << "Error log saved: " << errorLogPath << '\n';
     }
