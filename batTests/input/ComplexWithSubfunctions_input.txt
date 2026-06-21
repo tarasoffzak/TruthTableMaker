@@ -1,0 +1,1 @@
+A B $check C & | A ! $check & B C ^ | A B ^ $check | ! A $check B ! & C | ^ A B & $check ^ C ! | A ! B $check ^ & | C A & B ! $check | ^ ! A B ^ C $check ! & | A $check B & C ^ ! | A B | C ^ $check & ! | A B & ! C $check | ^
