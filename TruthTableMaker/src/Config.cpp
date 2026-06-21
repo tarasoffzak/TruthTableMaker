@@ -18,7 +18,7 @@ bool Config::isOperator(const std::string& token) const {
 
 Arity Config::getOperatorArity(const std::string& token) const {
     if (!isOperator(token)) {
-        throw Error(ErrorType::SYNTAX_ERROR, "Неизвестный оператор: '" + token + "'");
+        ErrorManager::raise(ErrorType::SYNTAX_ERROR, "Неизвестный оператор: '" + token + "'");
     }
     return operators.at(token).arity;
 }
@@ -46,7 +46,7 @@ void ConfigManager::parseCommandLine(int argc, char* argv[]) {
             // Переходим к следующему аргументу (значению флага)
             if (++i >= argc) {
                 // Если значения нет, выбрасываем ошибку
-                throw Error(ErrorType::SYNTAX_ERROR, "Флаг '" + arg + "' требует значения");
+                ErrorManager::raise(ErrorType::SYNTAX_ERROR, "Флаг '" + arg + "' требует значения");
             }
             // Сохраняем путь к выходному файлу
             currentConfig.outputFilePath = argv[i];
@@ -56,7 +56,7 @@ void ConfigManager::parseCommandLine(int argc, char* argv[]) {
             // Переходим к следующему аргументу (значению флага)
             if (++i >= argc) {
                 // Если значения нет, выбрасываем ошибку
-                throw Error(ErrorType::SYNTAX_ERROR, "Флаг '" + arg + "' требует значения");
+                ErrorManager::raise(ErrorType::SYNTAX_ERROR, "Флаг '" + arg + "' требует значения");
             }
             // Сохраняем путь к файлу функций
             currentConfig.functionsFilePath = argv[i];
@@ -64,13 +64,13 @@ void ConfigManager::parseCommandLine(int argc, char* argv[]) {
         // Проверяем флаг для пути к входному файлу с выражением
         else if (arg == "--input" || arg == "-i") {
             if (++i >= argc) {
-                throw Error(ErrorType::SYNTAX_ERROR, "Флаг '" + arg + "' требует значения");
+                ErrorManager::raise(ErrorType::SYNTAX_ERROR, "Флаг '" + arg + "' требует значения");
             }
             currentConfig.inputFilePath = argv[i];
         }
         // Если аргумент не распознан
         else {
-            throw Error(ErrorType::SYNTAX_ERROR, "Неизвестный аргумент: '" + arg + "'");
+            ErrorManager::raise(ErrorType::SYNTAX_ERROR, "Неизвестный аргумент: '" + arg + "'");
         }
     }
 }
@@ -80,7 +80,7 @@ void ConfigManager::loadFromFile(const std::string& filePath) {
     // Открываем файл конфигурации для чтения
     std::ifstream file(filePath);
     if (!file.is_open()) {
-        throw Error(ErrorType::FILE_ERROR, "Не удалось открыть файл конфигурации: " + filePath);
+        ErrorManager::raise(ErrorType::FILE_ERROR, "Не удалось открыть файл конфигурации: " + filePath);
     }
 
     std::string line;
@@ -99,7 +99,7 @@ void ConfigManager::loadFromFile(const std::string& filePath) {
         // Ищем разделитель '=' между ключом и значением
         std::size_t delimPos = line.find('=');
         if (delimPos == std::string::npos) {
-            throw Error(ErrorType::SYNTAX_ERROR, "Неверный формат строки " + std::to_string(lineNumber) + " (ожидается key=value)");
+            ErrorManager::raise(ErrorType::SYNTAX_ERROR, "Неверный формат строки " + std::to_string(lineNumber) + " (ожидается key=value)");
         }
 
         // Извлекаем ключ и значение, удаляем пробелы
@@ -118,13 +118,13 @@ void ConfigManager::loadFromFile(const std::string& filePath) {
         else if (key == "csv_delimiter") {
             // Разделитель должен быть ровно одним символом
             if (value.empty()) {
-                throw Error(ErrorType::SYNTAX_ERROR, "csv_delimiter не может быть пустым (строка " + std::to_string(lineNumber) + ")");
+                ErrorManager::raise(ErrorType::SYNTAX_ERROR, "csv_delimiter не может быть пустым (строка " + std::to_string(lineNumber) + ")");
             }
             currentConfig.csvDelimiter = value[0];
         }
         else {
             // Неизвестный ключ — выбрасываем ошибку
-            throw Error(ErrorType::SYNTAX_ERROR, "Неизвестный ключ конфигурации '" + key + "' в строке " + std::to_string(lineNumber));
+            ErrorManager::raise(ErrorType::SYNTAX_ERROR, "Неизвестный ключ конфигурации '" + key + "' в строке " + std::to_string(lineNumber));
         }
     }
 }

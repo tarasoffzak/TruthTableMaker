@@ -83,7 +83,7 @@ bool FunctManager::hasFunction(const std::string& name) const {
 const UserFunction* FunctManager::getFunction(const std::string& name) const {
     const auto it = functions.find(name);
     if (it == functions.end()) {
-        throw Error(ErrorType::SYNTAX_ERROR,
+        ErrorManager::raise(ErrorType::SYNTAX_ERROR,
             "Функция '" + name + "' не найдена");
     }
     return &it->second;
@@ -93,7 +93,7 @@ void FunctManager::loadFromFile(const std::string& filePath, const Config& confi
     // 1. Открыть файл с определениями функций (критическая ошибка, если не удалось)
     std::ifstream file(filePath);
     if (!file.is_open()) {
-        throw Error(ErrorType::FILE_ERROR,
+        ErrorManager::raise(ErrorType::FILE_ERROR,
             "Не удалось открыть файл функций: " + filePath);
     }
 

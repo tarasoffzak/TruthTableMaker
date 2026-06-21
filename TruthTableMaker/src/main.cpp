@@ -82,7 +82,7 @@ static void saveToFile(
 {
     std::ofstream out(path);
     if (!out.is_open())
-        throw Error(ErrorType::FILE_ERROR, "Не удалось открыть выходной файл: " + path);
+        ErrorManager::raise(ErrorType::FILE_ERROR, "Не удалось открыть выходной файл: " + path);
     writeCSV(out, delim, vars, table);
     std::cout << "Saved: " << path << '\n';
 }
@@ -167,7 +167,7 @@ int main(int argc, char* argv[]) {
 
             std::ifstream inFile(cfg.inputFilePath);
             if (!inFile.is_open())
-                throw Error(ErrorType::FILE_ERROR, "Не удалось открыть входной файл: " + cfg.inputFilePath);
+                ErrorManager::raise(ErrorType::FILE_ERROR, "Не удалось открыть входной файл: " + cfg.inputFilePath);
 
             // Берём последнюю непустую строку, игнорируя комментарии
             std::string line;
@@ -177,7 +177,7 @@ int main(int argc, char* argv[]) {
             }
 
             if (expression.empty())
-                throw Error(ErrorType::EVAL_ERROR, "Входной файл не содержит выражения: " + cfg.inputFilePath);
+                ErrorManager::raise(ErrorType::EVAL_ERROR, "Входной файл не содержит выражения: " + cfg.inputFilePath);
         }
 
         ErrorManager::clear();
@@ -216,7 +216,7 @@ int main(int argc, char* argv[]) {
                 std::string csvPath = cfg.outputFilePath + ".csv";
                 std::ofstream out(csvPath);
                 if (!out.is_open())
-                    throw Error(ErrorType::FILE_ERROR, "Не удалось открыть выходной файл: " + csvPath);
+                    ErrorManager::raise(ErrorType::FILE_ERROR, "Не удалось открыть выходной файл: " + csvPath);
                 writeCSV(out, cfg.csvDelimiter, vars, table);
                 out.close();
                 std::cout << "OK: " << csvPath << '\n';
